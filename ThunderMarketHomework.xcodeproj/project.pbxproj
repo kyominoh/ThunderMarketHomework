@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		31153E472F6B16C800CFA5A2 /* RxCocoa in Frameworks */ = {isa = PBXBuildFile; productRef = 31153E462F6B16C800CFA5A2 /* RxCocoa */; };
+		31153E502F6B1E8000CFA5A2 /* ComposableArchitecture in Frameworks */ = {isa = PBXBuildFile; productRef = 31153E4F2F6B1E8000CFA5A2 /* ComposableArchitecture */; };
+		31C36FA92F6AAE830030BE0B /* Moya in Frameworks */ = {isa = PBXBuildFile; productRef = 31C36FA82F6AAE830030BE0B /* Moya */; };
 		31C3CA5D2F6A96FA0030BE0B /* SnapKit in Frameworks */ = {isa = PBXBuildFile; productRef = 31C3CA5C2F6A96FA0030BE0B /* SnapKit */; };
 /* End PBXBuildFile section */
 
@@ -69,6 +72,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				31153E472F6B16C800CFA5A2 /* RxCocoa in Frameworks */,
+				31C36FA92F6AAE830030BE0B /* Moya in Frameworks */,
+				31153E502F6B1E8000CFA5A2 /* ComposableArchitecture in Frameworks */,
 				31C3CA5D2F6A96FA0030BE0B /* SnapKit in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
@@ -131,6 +137,9 @@
 			name = ThunderMarketHomework;
 			packageProductDependencies = (
 				31C3CA5C2F6A96FA0030BE0B /* SnapKit */,
+				31C36FA82F6AAE830030BE0B /* Moya */,
+				31153E462F6B16C800CFA5A2 /* RxCocoa */,
+				31153E4F2F6B1E8000CFA5A2 /* ComposableArchitecture */,
 			);
 			productName = ThunderMarketHomework;
 			productReference = 315011772F686DB5006E4CDE /* ThunderMarketHomework.app */;
@@ -216,6 +225,9 @@
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
 				31C3CA5B2F6A96FA0030BE0B /* XCRemoteSwiftPackageReference "SnapKit" */,
+				31C36FA72F6AAE830030BE0B /* XCRemoteSwiftPackageReference "Moya" */,
+				31153E452F6B16C800CFA5A2 /* XCRemoteSwiftPackageReference "RxSwift" */,
+				31153E4E2F6B1E8000CFA5A2 /* XCRemoteSwiftPackageReference "swift-composable-architecture" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 315011782F686DB5006E4CDE /* Products */;
@@ -316,7 +328,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
-				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = nonisolated;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
@@ -349,7 +361,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				STRING_CATALOG_GENERATE_SYMBOLS = YES;
 				SWIFT_APPROACHABLE_CONCURRENCY = YES;
-				SWIFT_DEFAULT_ACTOR_ISOLATION = MainActor;
+				SWIFT_DEFAULT_ACTOR_ISOLATION = nonisolated;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_UPCOMING_FEATURE_MEMBER_IMPORT_VISIBILITY = YES;
 				SWIFT_VERSION = 5.0;
@@ -604,6 +616,30 @@
 /* End XCConfigurationList section */
 
 /* Begin XCRemoteSwiftPackageReference section */
+		31153E452F6B16C800CFA5A2 /* XCRemoteSwiftPackageReference "RxSwift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/ReactiveX/RxSwift.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 6.10.2;
+			};
+		};
+		31153E4E2F6B1E8000CFA5A2 /* XCRemoteSwiftPackageReference "swift-composable-architecture" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/pointfreeco/swift-composable-architecture";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 1.25.2;
+			};
+		};
+		31C36FA72F6AAE830030BE0B /* XCRemoteSwiftPackageReference "Moya" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/Moya/Moya.git";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 15.0.3;
+			};
+		};
 		31C3CA5B2F6A96FA0030BE0B /* XCRemoteSwiftPackageReference "SnapKit" */ = {
 			isa = XCRemoteSwiftPackageReference;
 			repositoryURL = "https://github.com/SnapKit/SnapKit.git";
@@ -615,6 +651,21 @@
 /* End XCRemoteSwiftPackageReference section */
 
 /* Begin XCSwiftPackageProductDependency section */
+		31153E462F6B16C800CFA5A2 /* RxCocoa */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 31153E452F6B16C800CFA5A2 /* XCRemoteSwiftPackageReference "RxSwift" */;
+			productName = RxCocoa;
+		};
+		31153E4F2F6B1E8000CFA5A2 /* ComposableArchitecture */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 31153E4E2F6B1E8000CFA5A2 /* XCRemoteSwiftPackageReference "swift-composable-architecture" */;
+			productName = ComposableArchitecture;
+		};
+		31C36FA82F6AAE830030BE0B /* Moya */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = 31C36FA72F6AAE830030BE0B /* XCRemoteSwiftPackageReference "Moya" */;
+			productName = Moya;
+		};
 		31C3CA5C2F6A96FA0030BE0B /* SnapKit */ = {
 			isa = XCSwiftPackageProductDependency;
 			package = 31C3CA5B2F6A96FA0030BE0B /* XCRemoteSwiftPackageReference "SnapKit" */;

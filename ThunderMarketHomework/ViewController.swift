@@ -9,25 +9,65 @@ import SnapKit
 import UIKit
 
 class ViewController: UITabBarController {
-    private let vcOne = TabOneViewController()
-    private let vcTwo = TabTwoViewController()
-    private lazy var subViews = [vcOne, vcTwo]
+    private let configViewController = ConfigViewController()
+    private lazy var pageViewControllers: [UIViewController] = [configViewController]
+    var fakeViewControllers: [UIViewController] = []
     let pageViewController = UIPageViewController(transitionStyle: .scroll, navigationOrientation: .horizontal)
-    
+    let alignChangeBtn: UIButton = UIButton(type: .system)
+    var cellType: CellType = .full
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
         self.setupTabbar()
         self.setupPageViewController()
+        self.setupFloatingButton()
+    }
+    func setupFloatingButton() {
+        self.view.addSubview(alignChangeBtn)
+        alignChangeBtn.addTarget(self, action: #selector(toggleAlign), for: .touchUpInside)
+        alignChangeBtn.setTitle("정렬변경", for: .normal)
+        alignChangeBtn.snp.makeConstraints { make in
+            make.trailing.bottom.equalToSuperview().inset(20)
+        }
     }
     
     private func setupTabbar() {
         let fakeOne = UIViewController()
-        fakeOne.tabBarItem = UITabBarItem(title: "MAN", image: UIImage(systemName: "person"), tag: 0)
-        let fakeTwo = UIViewController()
-        fakeTwo.tabBarItem = UITabBarItem(title: "WOMAN", image: UIImage(systemName: "person.fill"), tag: 1)
-        self.viewControllers = [fakeOne, fakeTwo]
+        fakeOne.tabBarItem = UITabBarItem(title: "설정?", image: UIImage(systemName: "config"), tag: 0)
+        fakeViewControllers.append(fakeOne)
+        self.viewControllers = fakeViewControllers
         self.delegate = self
+//        configViewController.onButtonTap = { [weak self] in
+//            guard let self else { return }
+//            let content = ContentDelegateTypeViewController()
+//            self.pageViewControllers.append(content)
+//            let fakeView = UIViewController()
+//            fakeView.tabBarItem = UITabBarItem(title: "\(fakeViewControllers.count)", image: UIImage(systemName: "config"), tag: fakeViewControllers.count)
+//            self.fakeViewControllers.append(fakeView)
+//            self.viewControllers = self.fakeViewControllers
+//        }
+        
+        addDelegateTypeView()
+        addDifferableTypeView()
+    }
+    
+    private func addDelegateTypeView() {
+        if let vc = storyboard?.instantiateViewController(withIdentifier: "ContentDelegateTypeViewController") {
+            self.pageViewControllers.append(vc)
+            let fakeView = UIViewController()
+            fakeView.tabBarItem = UITabBarItem(title: "\(fakeViewControllers.count)", image: UIImage(systemName: "config"), tag: fakeViewControllers.count)
+            self.fakeViewControllers.append(fakeView)
+            self.viewControllers = self.fakeViewControllers
+        }
+    }
+    
+    private func addDifferableTypeView() {
+        let vc = ContentDifferableTypeViewController()
+        self.pageViewControllers.append(vc)
+        let fakeView = UIViewController()
+        fakeView.tabBarItem = UITabBarItem(title: "\(fakeViewControllers.count)", image: UIImage(systemName: "config"), tag: fakeViewControllers.count)
+        self.fakeViewControllers.append(fakeView)
+        self.viewControllers = self.fakeViewControllers
     }
     
     private func setupPageViewController() {
@@ -40,7 +80,22 @@ class ViewController: UITabBarController {
             make.top.leading.trailing.equalTo(view.safeAreaLayoutGuide)
             make.bottom.equalTo(tabBar.snp.top)
         }
-        pageViewController.setViewControllers([subViews[0]], direction: .forward, animated: false)
+        pageViewController.setViewControllers([pageViewControllers[0]], direction: .forward, animated: false)
+    }
+    
+    func toggleAlign(cellType: CellType) {
+        var space = 0.0
+        if cellType == .mini { 
+            cellType = .mini
+            space = 10
+        } else {
+            cellType = .full
+        }
+        if let layout = collectionview.collectionViewLayout as? UICollectionViewFlowLayout {
+            layout.minimumInteritemSpacing = space
+            layout.minimumLineSpacing = space
+        }
+        self.collectionview.reloadData()
     }
 }
 
@@ -49,7 +104,7 @@ extension ViewController: UITabBarControllerDelegate {
         guard let index = viewControllers?.firstIndex(of: viewController),
               index != selectedIndex else { return false }
         let direction: UIPageViewController.NavigationDirection = index > selectedIndex ? .forward : .reverse
-        pageViewController.setViewControllers([subViews[index]], direction: direction, animated: true)
+        pageViewController.setViewControllers([pageViewControllers[index]], direction: direction, animated: true)
         self.selectedIndex = index
         return false
     }
@@ -57,19 +112,19 @@ extension ViewController: UITabBarControllerDelegate {
 
 extension ViewController: UIPageViewControllerDelegate, UIPageViewControllerDataSource {
     func pageViewController(_ pageViewController: UIPageViewController, viewControllerBefore viewController: UIViewController) -> UIViewController? {
-        guard let index = subViews.firstIndex(of: viewController), index > 0 else { return nil }
-        return subViews[index - 1]
+        guard let index = pageViewControllers.firstIndex(of: viewController), index > 0 else { return nil }
+        return pageViewControllers[index - 1]
     }
     
     func pageViewController(_ pageViewController: UIPageViewController, viewControllerAfter viewController: UIViewController) -> UIViewController? {
-        guard let index = subViews.firstIndex(of: viewController), index < subViews.count - 1 else { return nil }
-        return subViews[index + 1]
+        guard let index = pageViewControllers.firstIndex(of: viewController), index < pageViewControllers.count - 1 else { return nil }
+        return pageViewControllers[index + 1]
     }
     
     func pageViewController(_ pageViewController: UIPageViewController, didFinishAnimating finished: Bool, previousViewControllers: [UIViewController], transitionCompleted completed: Bool) {
         if completed { 
             if let currentVC = pageViewController.viewControllers?.first,
-               let index = subViews.firstIndex(of: currentVC) {
+               let index = pageViewControllers.firstIndex(of: currentVC) {
                 self.selectedIndex = index
             }
         }
