@@ -5,6 +5,7 @@
 //  Created by 오교민 on 3/19/26.
 //
 
+import Foundation
 
 struct RandomResponse<T: Codable>: Codable {
     let results: [T]
@@ -14,15 +15,15 @@ struct RandomData: Codable, Hashable, Equatable, Sendable {
     let gender: String
     let name: RandomName
     let location: RandomLocation
-    let email: String
+    let email: String?
     let login: RandomLogin
-    let dob: RandomDob
-    let registered: RandomDob
+    let dob: RandomDob?
+    let registered: RandomRegistered?
     let phone: String
     let cell: String
     let `id`: RandomId
     let picture: RandomPicture
-    let nat: String
+    let nat: String?
     public static func == (lhs: RandomData, rhs: RandomData) -> Bool {
         lhs.name == rhs.name
     }
@@ -37,9 +38,30 @@ struct RandomLocation: Codable, Hashable, Equatable {
     let city: String
     let state: String
     let country: String
-    let postcode: Int
+    let postcode: String
     let coordinates: RandomCoordinates
     let timezone: RandomTimezone
+    
+    enum CodingKeys: String, CodingKey {
+        case street, city, state, country, postcode, coordinates, timezone
+    }
+    
+    init(from decoder: Decoder) throws {
+        let container = try decoder.container(keyedBy: CodingKeys.self)
+        street = try container.decode(RandomStreet.self, forKey: .street)
+        city = try container.decode(String.self, forKey: .city)
+        state = try container.decode(String.self, forKey: .state)
+        country = try container.decode(String.self, forKey: .country)
+        coordinates = try container.decode(RandomCoordinates.self, forKey: .coordinates)
+        timezone = try container.decode(RandomTimezone.self, forKey: .timezone)
+        if let stringValue = try? container.decode(String.self, forKey: .postcode) {
+            postcode = stringValue
+        } else if let intValue = try? container.decode(Int.self, forKey: .postcode) {
+            postcode = String(intValue)
+        } else {
+            postcode = ""
+        }
+    }
 }
 struct RandomLogin: Codable, Hashable, Equatable {
     let uuid: String
@@ -51,6 +73,10 @@ struct RandomLogin: Codable, Hashable, Equatable {
     let sha256: String
 }
 struct RandomDob: Codable, Hashable, Equatable {
+    let date: String
+    let age: Int
+}
+struct RandomRegistered: Codable, Hashable, Equatable {
     let date: String
     let age: Int
 }

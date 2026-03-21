@@ -38,13 +38,13 @@
                                 <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                 <collectionViewFlowLayout key="collectionViewLayout" minimumLineSpacing="0.0" minimumInteritemSpacing="0.0" id="50t-UP-msm">
                                     <size key="itemSize" width="204" height="128"/>
-                                    <size key="headerReferenceSize" width="0.0" height="0.0"/>
+                                    <size key="headerReferenceSize" width="50" height="50"/>
                                     <size key="footerReferenceSize" width="0.0" height="0.0"/>
                                     <inset key="sectionInset" minX="0.0" minY="0.0" maxX="0.0" maxY="0.0"/>
                                 </collectionViewFlowLayout>
                                 <cells>
                                     <collectionViewCell opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" reuseIdentifier="DelegateContentCell" id="V7f-A6-DFG" customClass="DelegateContentCell" customModule="ThunderMarketHomework" customModuleProvider="target">
-                                        <rect key="frame" x="94.666666666666671" y="0.0" width="204" height="128"/>
+                                        <rect key="frame" x="94.666666666666671" y="50" width="204" height="128"/>
                                         <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                         <collectionViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" insetsLayoutMarginsFromSafeArea="NO" id="5Ld-44-0M6">
                                             <rect key="frame" x="0.0" y="0.0" width="204" height="128"/>
@@ -56,7 +56,21 @@
                                                     <color key="backgroundColor" systemColor="systemBackgroundColor"/>
                                                 </view>
                                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Ng8-rh-D79">
-                                                    <rect key="frame" x="81" y="54" width="42" height="21"/>
+                                                    <rect key="frame" x="80.333333333333371" y="53" width="42" height="21"/>
+                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                                    <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                                    <nil key="textColor"/>
+                                                    <nil key="highlightedColor"/>
+                                                </label>
+                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="cbv-qE-tlf">
+                                                    <rect key="frame" x="80.333333333333371" y="53" width="42" height="21"/>
+                                                    <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
+                                                    <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                                    <nil key="textColor"/>
+                                                    <nil key="highlightedColor"/>
+                                                </label>
+                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" fixedFrame="YES" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="9Hg-l9-5my">
+                                                    <rect key="frame" x="80.333333333333371" y="53" width="42" height="21"/>
                                                     <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
                                                     <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                                     <nil key="textColor"/>
@@ -66,25 +80,44 @@
                                         </collectionViewCellContentView>
                                         <size key="customSize" width="204" height="128"/>
                                         <connections>
+                                            <outlet property="desc" destination="cbv-qE-tlf" id="CEV-79-KmK"/>
+                                            <outlet property="email" destination="9Hg-l9-5my" id="CB1-1H-9G5"/>
                                             <outlet property="img" destination="sGb-cw-AFw" id="ahx-5N-vsR"/>
                                             <outlet property="name" destination="Ng8-rh-D79" id="Q9w-LI-y3S"/>
                                         </connections>
                                     </collectionViewCell>
                                 </cells>
+                                <collectionReusableView key="sectionHeaderView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" insetsLayoutMarginsFromSafeArea="NO" reuseIdentifier="DelegateHeaderView" id="lGM-Wp-k8X" customClass="DelegateHeaderView" customModule="ThunderMarketHomework" customModuleProvider="target">
+                                    <rect key="frame" x="0.0" y="0.0" width="393" height="50"/>
+                                    <autoresizingMask key="autoresizingMask"/>
+                                    <subviews>
+                                        <segmentedControl opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="left" contentVerticalAlignment="top" segmentControlStyle="plain" selectedSegmentIndex="0" translatesAutoresizingMaskIntoConstraints="NO" id="iaa-EY-fu6">
+                                            <rect key="frame" x="0.0" y="5" width="393" height="41"/>
+                                            <segments>
+                                                <segment title="Male"/>
+                                                <segment title="Female"/>
+                                                <segment title="SEED"/>
+                                                <segment title="NAT"/>
+                                                <segment title="INC"/>
+                                                <segment title="EXC"/>
+                                            </segments>
+                                        </segmentedControl>
+                                    </subviews>
+                                    <constraints>
+                                        <constraint firstAttribute="trailing" secondItem="iaa-EY-fu6" secondAttribute="trailing" id="5Gc-Fy-WiX"/>
+                                        <constraint firstItem="iaa-EY-fu6" firstAttribute="leading" secondItem="lGM-Wp-k8X" secondAttribute="leading" id="8tb-P7-mwY"/>
+                                        <constraint firstItem="iaa-EY-fu6" firstAttribute="top" secondItem="lGM-Wp-k8X" secondAttribute="top" constant="5" id="Itl-VE-ye8"/>
+                                        <constraint firstAttribute="bottom" secondItem="iaa-EY-fu6" secondAttribute="bottom" constant="5" id="RdA-9B-Gbw"/>
+                                    </constraints>
+                                    <connections>
+                                        <outlet property="segment" destination="iaa-EY-fu6" id="CJe-ab-pAO"/>
+                                    </connections>
+                                </collectionReusableView>
                                 <connections>
                                     <outlet property="dataSource" destination="6XK-oO-db3" id="KUL-pf-k3k"/>
                                     <outlet property="delegate" destination="6XK-oO-db3" id="sp4-AQ-Zw9"/>
                                 </connections>
                             </collectionView>
-                            <button opaque="NO" contentMode="scaleToFill" fixedFrame="YES" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="system" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="CFO-mr-bIA">
-                                <rect key="frame" x="155" y="691" width="83" height="35"/>
-                                <autoresizingMask key="autoresizingMask" flexibleMaxX="YES" flexibleMaxY="YES"/>
-                                <state key="normal" title="Button"/>
-                                <buttonConfiguration key="configuration" style="filled" title="정렬변경"/>
-                                <connections>
-                                    <action selector="toggleAlign:" destination="6XK-oO-db3" eventType="touchUpInside" id="ajY-07-f2U"/>
-                                </connections>
-                            </button>
                         </subviews>
                         <viewLayoutGuide key="safeArea" id="0eg-l8-Jie"/>
                         <color key="backgroundColor" systemColor="systemBackgroundColor"/>
@@ -96,7 +129,7 @@
                         </constraints>
                     </view>
                     <connections>
-                        <outlet property="collectionview" destination="nnC-iM-b9Z" id="jwy-oc-3Sk"/>
+                        <outlet property="collectionview" destination="nnC-iM-b9Z" id="Kem-bG-aJE"/>
                     </connections>
                 </viewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="Ta6-BY-6ZP" userLabel="First Responder" customClass="UIResponder" sceneMemberID="firstResponder"/>

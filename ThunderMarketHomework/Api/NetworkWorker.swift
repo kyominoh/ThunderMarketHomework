@@ -9,15 +9,6 @@ import Foundation
 import Moya
 internal import Alamofire
 
-enum RandomUserApi {
-    case fetchMale
-    case fetchFemale
-    case fetchSeed
-    case fetchNat
-    case fetchInc
-    case fetchExc
-}
-
 extension RandomUserApi: TargetType {
     var baseURL: URL {
         URL(string: "https://randomuser.me")!
@@ -26,6 +17,10 @@ extension RandomUserApi: TargetType {
     var task: Moya.Task {
         var params: [String: String] = [:]
         switch self {
+        case .fetchData(let page, let param):
+            if let page = page { params["page"] = "\(page)" }
+            if let param = param { params[param.key] = param.value }
+            
         case .fetchMale:
             params["gender"] = "male"
         case .fetchFemale:
@@ -39,6 +34,7 @@ extension RandomUserApi: TargetType {
         case .fetchExc:
             params["exc"] = "dob,nat,email"
         }
+        params["results"] = "20"
         return .requestParameters(parameters: params, encoding: URLEncoding.queryString)
     }
     

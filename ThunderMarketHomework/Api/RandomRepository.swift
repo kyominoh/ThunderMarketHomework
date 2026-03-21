@@ -27,13 +27,33 @@ struct RandomRepository {
             }
         }
     }
-    func fetchMaleUser() async throws -> RandomResponse<RandomData> {
-        return try await fetchRequest(api: .fetchMale)
+    
+    private func fetchRequest<T: Decodable>(_ page: Int?, param: RandomUserParam?) async throws -> T {
+        return try await withCheckedThrowingContinuation { continuation in
+            provider.request(.fetchData(page: page, param: param)) { response in
+                switch response {
+                case .success(let result):
+                    do {
+                        let data = try JSONDecoder().decode(T.self, from: result.data)
+                        continuation.resume(returning: data)
+                    } catch {
+                        continuation.resume(throwing: error)
+                    }
+                case .failure(let error):
+                    continuation.resume(throwing: error)
+                }
+            }
+        }
+    }
+    func fetchData(page: Int?, param: RandomUserParam?) async throws -> RandomResponse<RandomData> {
+        return try await fetchRequest(page, param: param)
     }
     
     func fetchFemaleUser() async throws -> RandomResponse<RandomData> {
         return try await fetchRequest(api: .fetchFemale)
     }
+    
+    
 }
 
 

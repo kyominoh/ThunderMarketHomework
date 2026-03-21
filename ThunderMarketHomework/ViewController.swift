@@ -8,6 +8,13 @@
 import SnapKit
 import UIKit
 
+struct ContentViewModel {
+    let usecase = RandomUsecase()
+    public func fetchData(page: Int, param: RandomUserParam) async throws -> RandomResponse<RandomData> { 
+        try await self.usecase.fetchData(page: page, param: param)
+    }
+}
+
 class ViewController: UITabBarController {
     private let configViewController = ConfigViewController()
     private lazy var pageViewControllers: [UIViewController] = [configViewController]
@@ -15,6 +22,7 @@ class ViewController: UITabBarController {
     let pageViewController = UIPageViewController(transitionStyle: .scroll, navigationOrientation: .horizontal)
     let alignChangeBtn: UIButton = UIButton(type: .system)
     var cellType: CellType = .full
+    let viewModel = ContentViewModel()
     override func viewDidLoad() {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
@@ -27,7 +35,8 @@ class ViewController: UITabBarController {
         alignChangeBtn.addTarget(self, action: #selector(toggleAlign), for: .touchUpInside)
         alignChangeBtn.setTitle("정렬변경", for: .normal)
         alignChangeBtn.snp.makeConstraints { make in
-            make.trailing.bottom.equalToSuperview().inset(20)
+            make.trailing.equalToSuperview().inset(20)
+            make.bottom.equalTo(tabBar.snp.top).inset(50)
         }
     }
     
@@ -52,7 +61,8 @@ class ViewController: UITabBarController {
     }
     
     private func addDelegateTypeView() {
-        if let vc = storyboard?.instantiateViewController(withIdentifier: "ContentDelegateTypeViewController") {
+        if let vc = storyboard?.instantiateViewController(withIdentifier: "ContentDelegateTypeViewController") as? ContentDelegateTypeViewController {
+            vc.contentDataSource = self
             self.pageViewControllers.append(vc)
             let fakeView = UIViewController()
             fakeView.tabBarItem = UITabBarItem(title: "\(fakeViewControllers.count)", image: UIImage(systemName: "config"), tag: fakeViewControllers.count)
@@ -83,19 +93,32 @@ class ViewController: UITabBarController {
         pageViewController.setViewControllers([pageViewControllers[0]], direction: .forward, animated: false)
     }
     
-    func toggleAlign(cellType: CellType) {
-        var space = 0.0
+    @objc func toggleAlign() {
         if cellType == .mini { 
-            cellType = .mini
-            space = 10
-        } else {
             cellType = .full
+        } else {
+            cellType = .mini
         }
-        if let layout = collectionview.collectionViewLayout as? UICollectionViewFlowLayout {
-            layout.minimumInteritemSpacing = space
-            layout.minimumLineSpacing = space
+        self.pageViewControllers.forEach { vc in
+            let viewCon = vc as? ContentViewAlignChange ?? nil
+            if vc.viewIfLoaded != nil {
+                viewCon?.toggleAlign(cellType: cellType)
+            }
         }
-        self.collectionview.reloadData()
+    }
+}
+
+protocol ContentViewAlignChange {
+    func toggleAlign(cellType: CellType)
+}
+
+protocol ContentViewDataSource {
+    func getData(page: Int, param: RandomUserParam) async throws -> RandomResponse<RandomData>
+}
+
+extension ViewController: ContentViewDataSource {
+    func getData(page: Int, param: RandomUserParam) async throws -> RandomResponse<RandomData> {
+        try await self.viewModel.fetchData(page: page, param: param)
     }
 }
 
@@ -130,3 +153,4 @@ extension ViewController: UIPageViewControllerDelegate, UIPageViewControllerData
         }
     }
 }
+

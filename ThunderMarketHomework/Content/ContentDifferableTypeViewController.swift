@@ -12,29 +12,28 @@ class ContentDifferableTypeViewController: UIViewController {
     typealias CellData = RandomData
     var collectionView: UICollectionView!
     var dataSource: UICollectionViewDiffableDataSource<Section, CellData>!
-    var isGridView = false
+    let refreshControl = UIRefreshControl()
     var items: [CellData] = []
+    var page = 1
+    
+    let usecase = RandomUsecase()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         configureHierarchy()
         configureDataSource()
         initSnapshot()
-        let usecase = RandomUsecase()
-        Task {
-            do {
-                let data = try await usecase.fetchMaleUser()
-                self.applySnapshot(randomDatas: data.results)
-                print(data)
-            } catch {
-                print(error)
-            }
-        }
+        getDatas()
     }
     func configureHierarchy() {
         let layout = createLayout(isGrid: true)
         collectionView = UICollectionView(frame: view.bounds, collectionViewLayout: layout)
         collectionView.autoresizingMask = [.flexibleWidth, .flexibleHeight]
         view.addSubview(collectionView)
+        
+        refreshControl.attributedTitle = NSAttributedString(string: "당겨서 새로고침")
+        refreshControl.addTarget(self, action: #selector(refreshData), for: .valueChanged)
+        collectionView.refreshControl = refreshControl
     }
 
     func configureDataSource() {
@@ -74,5 +73,44 @@ class ContentDifferableTypeViewController: UIViewController {
 
         let section = NSCollectionLayoutSection(group: group)
         return UICollectionViewCompositionalLayout(section: section)
+    }   
+}
+
+extension ContentDifferableTypeViewController: ContentViewAlignChange {
+    func toggleAlign(cellType: CellType) {
+        let newLayout = createLayout(isGrid: cellType == .mini)
+        collectionView.setCollectionViewLayout(newLayout, animated: true)
+        let snapshot = dataSource.snapshot()
+        dataSource.apply(snapshot, animatingDifferences: true)
+    }
+}
+
+extension ContentDifferableTypeViewController {
+    func getDatas() {
+        Task {
+            defer {
+                DispatchQueue.main.async { [weak self] in
+                    guard let self else { return }
+                    if self.refreshControl.isRefreshing {
+                        self.refreshControl.endRefreshing()
+                    }    
+                }
+            }
+            do {
+                let data = try await usecase.fetchData(page: page, param: .female)
+                self.applySnapshot(randomDatas: data.results)
+                print(data)
+                if data.results.count > 0 {
+                    page += 2
+                }
+            } catch {
+                print(error)
+            }
+        }
+    }
+    
+    @objc func refreshData() {
+        items = []
+        getDatas()
     }
 }
