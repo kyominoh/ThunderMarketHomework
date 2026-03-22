@@ -10,7 +10,8 @@ import Foundation
 struct RandomUsecase {
     let userRepository = RandomRepository()
     func fetchData(page: Int?, param: RandomUserParam?) async throws -> RandomResponse<RandomData> {
-        try await userRepository.fetchData(page: page, param: param)
+        print("RandomUsecase fetchData")
+        return try await userRepository.fetchData(page: page, param: param)
     }
     func fetchFemaleUser() async throws -> RandomResponse<RandomData> {
         try await userRepository.fetchFemaleUser()

@@ -9,6 +9,10 @@ import Foundation
 import ComposableArchitecture
 import Dependencies
 
+private enum CancelID {
+    case request
+}
+
 @Reducer
 public struct ContentFeature {
     @Dependency(RandomApiClient.self) var randomApiClient: RandomApiClient
@@ -58,6 +62,7 @@ public struct ContentFeature {
                         await send(.response([]))
                     }
                 }
+                .cancellable(id: CancelID.request, cancelInFlight: true)
 
             case .response(let newItems):
                 state.isLoading = false

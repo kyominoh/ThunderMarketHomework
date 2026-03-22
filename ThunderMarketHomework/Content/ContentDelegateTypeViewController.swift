@@ -19,31 +19,41 @@ class ContentDelegateTypeViewController: UIViewController {
     var contentDataSource: ContentViewDataSource?
     var isLoading = false
     var isEnd = false
+    var isDeleteMode = false
+    var selectedItems: Set<RandomData> = []
+    private var currentRequestTask: Task<Void, Never>?
     let requestRelay = BehaviorRelay<(page: Int, param: RandomUserParam)>(value: (page: 1, param: RandomUserParam.male))
     let resultSubject = PublishSubject<[RandomData]>()
     let segmentSubject = PublishSubject<Int>()
+    let deleteSubject = PublishSubject<[IndexPath]>()
     let disposeBag = DisposeBag()
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        configureHierarchy()
-        bind()
+        self.edgesForExtendedLayout = [.bottom]
+        self.configureHierarchy()
+        self.bind()
     }
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        if let rootVC = parent?.parent as? ViewController {
+        // ContentDelegateTypeVC → UINavigationController → UIPageViewController → ViewController
+        if let rootVC = parent?.parent?.parent as? ViewController {
             toggleAlign(cellType: rootVC.cellType)
         }
     }
 
     private func configureHierarchy() {
+        self.title = "Delegate+Rx"
         if let layout = collectionview.collectionViewLayout as? UICollectionViewFlowLayout {
             layout.sectionInset = .zero
         }
-        refreshControl.attributedTitle = NSAttributedString(string: "당겨서 새로고침")
-        collectionview.refreshControl = refreshControl
-        collectionview.prefetchDataSource = self
+        self.refreshControl.attributedTitle = NSAttributedString(string: "당겨서 새로고침")
+        self.collectionview.refreshControl = refreshControl
+        self.collectionview.prefetchDataSource = self
+        
+        let item = UIBarButtonItem(title: "삭제", style: .plain, target: self, action: #selector(changDeleteLayout))
+        self.navigationItem.rightBarButtonItem = item
     }
     
     private func bind() {
@@ -87,6 +97,9 @@ class ContentDelegateTypeViewController: UIViewController {
                 if !owner.refreshControl.isRefreshing {
                     owner.refreshControl.beginRefreshing()
                 }
+                if owner.isDeleteMode {
+                    owner.cancelDelete()
+                }
                 owner.requestData(params: params)
             }
             .subscribe()
@@ -127,25 +140,77 @@ class ContentDelegateTypeViewController: UIViewController {
             }
             .subscribe()
             .disposed(by: self.disposeBag)
+        
+        self.deleteSubject
+            .take(until: self.rx.deallocated)
+            .observe(on: MainScheduler.asyncInstance)
+            .withUnretained(self)
+            .subscribe(onNext: { owner, indexPaths in
+                guard !owner.isLoading else { return }
+                let sorted = indexPaths.sorted { $0.row > $1.row }
+                sorted.forEach { owner.items.remove(at: $0.row) }
+                owner.collectionview.deleteItems(at: indexPaths)
+                owner.selectedItems.removeAll()
+                owner.isDeleteMode = false
+                owner.navigationItem.leftBarButtonItem = nil
+                let rightItem = UIBarButtonItem(title: "삭제", style: .plain, target: owner, action: #selector(owner.changDeleteLayout))
+                owner.navigationItem.setRightBarButton(rightItem, animated: true)
+            })
+            .disposed(by: self.disposeBag)
     }
     
     private func requestData(params: (page: Int, param: RandomUserParam)?) {
         guard let source = self.contentDataSource,
                 let page = params?.page,
                 let param = params?.param else { return }
-        Task.detached { [weak self] in
+        currentRequestTask?.cancel()
+        currentRequestTask = Task.detached { [weak self] in
             guard let self else { return }
             do {
                 let response = try await source.getData(page: page, param: param)
+                guard !Task.isCancelled else { return }
                 await self.resultSubject.onNext(response.results)
-                print(response.results.first)
             } catch {
+                guard !Task.isCancelled else { return }
                 print(error)
             }
         }
     }
 }
+extension ContentDelegateTypeViewController {
+    @objc func changDeleteLayout() {
+        isDeleteMode = true
+        selectedItems.removeAll()
+        if #available(iOS 26.0, *) {
+            let rightItem = UIBarButtonItem(title: "삭제", style: .prominent, target: self, action: #selector(acceptDeleteItems))
+            self.navigationItem.setRightBarButton(rightItem, animated: true)
+        } else {
+            let rightItem = UIBarButtonItem(title: "삭제", style: .plain, target: self, action: #selector(acceptDeleteItems))
+            self.navigationItem.setRightBarButton(rightItem, animated: true)
+        }
+        let leftItem = UIBarButtonItem(title: "취소", style: .plain, target: self, action: #selector(cancelDelete))
+        self.navigationItem.setLeftBarButton(leftItem, animated: true)
+        self.collectionview.reloadData()
+    }
 
+    @objc func cancelDelete() {
+        isDeleteMode = false
+        selectedItems.removeAll()
+        let rightItem = UIBarButtonItem(title: "삭제", style: .plain, target: self, action: #selector(changDeleteLayout))
+        self.navigationItem.setRightBarButton(rightItem, animated: true)
+        self.navigationItem.leftBarButtonItem = nil
+        self.collectionview.reloadData()
+    }
+
+    @objc func acceptDeleteItems() {
+        guard !selectedItems.isEmpty else { return }
+        let indexPaths = selectedItems.compactMap { item -> IndexPath? in
+            guard let row = items.firstIndex(of: item) else { return nil }
+            return IndexPath(row: row, section: 0)
+        }
+        self.deleteSubject.onNext(indexPaths)
+    }
+}
 extension ContentDelegateTypeViewController: ContentViewAlignChange {
     func toggleAlign(cellType: CellType) {
         self.cellType = cellType
@@ -179,8 +244,18 @@ extension ContentDelegateTypeViewController: UICollectionViewDelegate {
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         guard indexPath.row < items.count else { return }
         let data = items[indexPath.row]
-        let vc = ContentZoomViewController(data: data)
-        present(vc, animated: true)
+
+        if isDeleteMode {
+            if selectedItems.contains(data) {
+                selectedItems.remove(data)
+            } else {
+                selectedItems.insert(data)
+            }
+            collectionView.reloadItems(at: [indexPath])
+        } else {
+            let vc = ContentZoomViewController(data: data)
+            present(vc, animated: true)
+        }
     }
 }
 
@@ -210,6 +285,8 @@ extension ContentDelegateTypeViewController: UICollectionViewDataSource {
             cell.img.loadImage(url: data.picture.thumbnail)
             cell.desc.text = data.location.city
             cell.email.text = data.email
+            cell.isDeleteMode = self.isDeleteMode
+            cell.isChecked = self.selectedItems.contains(data)
         }
         cell.cellType = self.cellType
         return cell

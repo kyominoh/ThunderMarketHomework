@@ -59,7 +59,7 @@ class ContentDifferableTypeViewController: UIViewController {
         self.collectionView.addGestureRecognizer(longPress)
     }
 
-    @objc private func handleLongPress(_ gesture: UILongPressGestureRecognizer) {
+    @objc func handleLongPress(_ gesture: UILongPressGestureRecognizer) {
         guard gesture.state == .began else { return }
         let location = gesture.location(in: self.collectionView)
         guard let indexPath = self.collectionView.indexPathForItem(at: location),

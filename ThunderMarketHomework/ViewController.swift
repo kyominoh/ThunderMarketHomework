@@ -35,15 +35,15 @@ class ViewController: UITabBarController {
     func setupFloatingButton() {
         self.view.addSubview(alignChangeBtn)
         alignChangeBtn.addTarget(self, action: #selector(toggleAlign), for: .touchUpInside)
-        alignChangeBtn.setTitle("정렬변경", for: .normal)
-        alignChangeBtn.setTitleColor(.white, for: .normal)
+        alignChangeBtn.setImage(UIImage(systemName: "square.grid.2x2"), for: .normal)
+        alignChangeBtn.tintColor = .white
         alignChangeBtn.backgroundColor = .systemBlue
         alignChangeBtn.layer.cornerRadius = 10
         alignChangeBtn.clipsToBounds = true
         alignChangeBtn.contentEdgeInsets = UIEdgeInsets(top: 20, left: 20, bottom: 20, right: 20)
         alignChangeBtn.snp.makeConstraints { make in
             make.trailing.equalToSuperview().inset(20)
-            make.bottom.equalTo(self.view.safeAreaInsets.bottom).inset(100)
+            make.bottom.equalTo(self.tabBar.snp.top).inset(-20)
         }
     }
     
@@ -73,7 +73,8 @@ class ViewController: UITabBarController {
     private func addDelegateTypeView() {
         if let vc = storyboard?.instantiateViewController(withIdentifier: "ContentDelegateTypeViewController") as? ContentDelegateTypeViewController {
             vc.contentDataSource = self
-            self.pageViewControllers.append(vc)
+            let nav = UINavigationController(rootViewController: vc)
+            self.pageViewControllers.append(nav)
             let fakeView = UIViewController()
             fakeView.tabBarItem = UITabBarItem(title: "Delegate+Rx", image: UIImage(systemName: "list.star"), tag: fakeViewControllers.count)
             self.fakeViewControllers.append(fakeView)
@@ -106,14 +107,16 @@ class ViewController: UITabBarController {
     @objc func toggleAlign() {
         if cellType == .mini { 
             cellType = .full
+            alignChangeBtn.setImage(UIImage(systemName: "square.grid.2x2"), for: .normal)
         } else {
             cellType = .mini
+            alignChangeBtn.setImage(UIImage(systemName: "rectangle.grid.1x2"), for: .normal)
         }
         self.pageViewControllers.forEach { vc in
-            let viewCon = vc as? ContentViewAlignChange ?? nil
-            if vc.viewIfLoaded != nil {
-                viewCon?.toggleAlign(cellType: cellType)
-            }
+            let target = (vc as? UINavigationController)?.topViewController ?? vc
+            guard let viewCon = target as? ContentViewAlignChange,
+                  target.viewIfLoaded != nil else { return }
+            viewCon.toggleAlign(cellType: cellType)
         }
     }
 }
