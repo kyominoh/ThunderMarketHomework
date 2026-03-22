@@ -29,6 +29,14 @@ class ContentDelegateTypeViewController: UIViewController {
         configureHierarchy()
         bind()
     }
+
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        if let rootVC = parent?.parent as? ViewController {
+            toggleAlign(cellType: rootVC.cellType)
+        }
+    }
+
     private func configureHierarchy() {
         if let layout = collectionview.collectionViewLayout as? UICollectionViewFlowLayout {
             layout.sectionInset = .zero

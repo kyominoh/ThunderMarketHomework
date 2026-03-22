@@ -11,15 +11,13 @@ import SnapKit
 
 class ContentZoomViewController: UIViewController {
     let data: RandomData
-    
-    private let scrollView = UIScrollView()
-    private let imageView = UIImageView()
-    private let closeButton = UIButton(type: .system)
+    let scrollView = UIScrollView()
+    let imageView = UIImageView()
 
     init(data: RandomData) {
         self.data = data
         super.init(nibName: nil, bundle: nil)
-        modalPresentationStyle = .fullScreen
+        self.modalPresentationStyle = .fullScreen
     }
     
     required init?(coder: NSCoder) {
@@ -28,55 +26,82 @@ class ContentZoomViewController: UIViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
-        setupUI()
-        loadImage()
+        self.setupUI()
+        self.loadImage()
     }
 
-    private func setupUI() {
+    func setupUI() {
         view.backgroundColor = .black
 
-        scrollView.delegate = self
-        scrollView.minimumZoomScale = 1.0
-        scrollView.maximumZoomScale = 2.0
-        scrollView.showsHorizontalScrollIndicator = false
-        scrollView.showsVerticalScrollIndicator = false
-        scrollView.contentInsetAdjustmentBehavior = .never
-        scrollView.bouncesZoom = true
-        view.addSubview(scrollView)
-        scrollView.snp.makeConstraints { $0.edges.equalToSuperview() }
+        self.scrollView.delegate = self
+        self.scrollView.minimumZoomScale = 1.0
+        self.scrollView.maximumZoomScale = 2.0
+        self.scrollView.showsHorizontalScrollIndicator = false
+        self.scrollView.showsVerticalScrollIndicator = false
+        self.scrollView.contentInsetAdjustmentBehavior = .never
+        self.scrollView.bouncesZoom = true
+        self.view.addSubview(self.scrollView)
+        self.scrollView.snp.makeConstraints { $0.edges.equalToSuperview() }
 
-        imageView.contentMode = .scaleAspectFit
-        imageView.clipsToBounds = true
-        scrollView.addSubview(imageView)
-        imageView.snp.makeConstraints {
-            $0.edges.equalTo(scrollView.contentLayoutGuide)
-            $0.size.equalTo(scrollView.frameLayoutGuide)
+        self.imageView.contentMode = .scaleAspectFit
+        self.imageView.clipsToBounds = true
+        self.scrollView.addSubview(self.imageView)
+        self.imageView.snp.makeConstraints { [weak self] in
+            guard let self else { return }
+            $0.edges.equalTo(self.scrollView.contentLayoutGuide)
+            $0.size.equalTo(self.scrollView.frameLayoutGuide)
         }
 
-        var config = UIButton.Configuration.plain()
-        config.image = UIImage(systemName: "xmark.circle.fill")
-        config.preferredSymbolConfigurationForImage = UIImage.SymbolConfiguration(pointSize: 28)
-        closeButton.configuration = config
-        closeButton.tintColor = .white
-        closeButton.addTarget(self, action: #selector(didTapClose), for: .touchUpInside)
-        view.addSubview(closeButton)
-        closeButton.snp.makeConstraints {
-            $0.top.equalTo(view.safeAreaLayoutGuide).offset(12)
+        let closeButton2 = UIButton(type: .system)
+        var closeConfig = UIButton.Configuration.plain()
+        closeConfig.image = UIImage(systemName: "xmark.circle.fill")
+        closeConfig.preferredSymbolConfigurationForImage = UIImage.SymbolConfiguration(pointSize: 28)
+        closeButton2.configuration = closeConfig
+        closeButton2.tintColor = .white
+        closeButton2.addTarget(self, action: #selector(didTapClose), for: .touchUpInside)
+        self.view.addSubview(closeButton2)
+        closeButton2.snp.makeConstraints { [weak self] in
+            guard let self else { return }
+            $0.top.equalTo(self.view.safeAreaLayoutGuide).offset(12)
             $0.trailing.equalToSuperview().inset(16)
+        }
+        
+        let scaleUPButton = UIButton(type: .system)
+        var plusConfig = UIButton.Configuration.plain()
+        plusConfig.image = UIImage(systemName: "plus.square")
+        plusConfig.preferredSymbolConfigurationForImage = UIImage.SymbolConfiguration(pointSize: 28)
+        scaleUPButton.configuration = plusConfig
+        scaleUPButton.tintColor = .white
+        scaleUPButton.addTarget(self, action: #selector(didTapZoomIn), for: .touchUpInside)
+        
+        let scaleMinusButton = UIButton(type: .system)
+        var minusCOnfig = UIButton.Configuration.plain()
+        minusCOnfig.image = UIImage(systemName: "minus.square")
+        minusCOnfig.preferredSymbolConfigurationForImage = UIImage.SymbolConfiguration(pointSize: 28)
+        scaleMinusButton.configuration = minusCOnfig
+        scaleMinusButton.tintColor = .white
+        scaleMinusButton.addTarget(self, action: #selector(didTapZoomOut), for: .touchUpInside)
+        let buttonStackView = UIStackView(arrangedSubviews: [scaleUPButton, scaleMinusButton])
+        buttonStackView.axis = .horizontal
+        self.view.addSubview(buttonStackView)
+        buttonStackView.snp.makeConstraints { [weak self] in
+            guard let self else { return }
+            $0.centerX.equalToSuperview()
+            $0.bottom.equalTo(self.view.safeAreaLayoutGuide).inset(10)
         }
 
         let singleTap = UITapGestureRecognizer(target: self, action: #selector(didTapClose))
         let doubleTap = UITapGestureRecognizer(target: self, action: #selector(handleDoubleTap(_:)))
         doubleTap.numberOfTapsRequired = 2
         singleTap.require(toFail: doubleTap)
-        scrollView.addGestureRecognizer(singleTap)
-        scrollView.addGestureRecognizer(doubleTap)
+        self.scrollView.addGestureRecognizer(singleTap)
+        self.scrollView.addGestureRecognizer(doubleTap)
     }
 
-    private func loadImage() {
-        let urlString = data.picture.large
+    func loadImage() {
+        let urlString = self.data.picture.large
         if let cached = MemoryCacheManager.get(forKey: urlString) {
-            imageView.image = cached
+            self.imageView.image = cached
             return
         }
 
@@ -92,35 +117,41 @@ class ContentZoomViewController: UIViewController {
         }
     }
 
-    @objc private func didTapClose() {
+    @objc func didTapClose() {
         self.dismiss(animated: true)
     }
+    @objc func didTapZoomIn() {
+        self.scrollView.setZoomScale(self.scrollView.maximumZoomScale, animated: true)
+    }
+    @objc func didTapZoomOut() {
+        self.scrollView.setZoomScale(self.scrollView.minimumZoomScale, animated: true)
+    }
 
-    @objc private func handleDoubleTap(_ sender: UITapGestureRecognizer) {
-        if scrollView.zoomScale > scrollView.minimumZoomScale {
-            scrollView.setZoomScale(scrollView.minimumZoomScale, animated: true)
+    @objc func handleDoubleTap(_ sender: UITapGestureRecognizer) {
+        if self.scrollView.zoomScale > self.scrollView.minimumZoomScale {
+            self.scrollView.setZoomScale(self.scrollView.minimumZoomScale, animated: true)
         } else {
-            let point = sender.location(in: imageView)
+            let point = sender.location(in: self.imageView)
             let zoomRect = CGRect(
                 x: point.x - 50,
                 y: point.y - 50,
                 width: 100,
                 height: 100
             )
-            scrollView.zoom(to: zoomRect, animated: true)
+            self.scrollView.zoom(to: zoomRect, animated: true)
         }
     }
 }
 
 extension ContentZoomViewController: UIScrollViewDelegate {
     func viewForZooming(in scrollView: UIScrollView) -> UIView? {
-        return imageView
+        return self.imageView
     }
 
     func scrollViewDidZoom(_ scrollView: UIScrollView) {
         let offsetX = max((scrollView.bounds.width - scrollView.contentSize.width) / 2, 0)
         let offsetY = max((scrollView.bounds.height - scrollView.contentSize.height) / 2, 0)
-        imageView.center = CGPoint(
+        self.imageView.center = CGPoint(
             x: scrollView.contentSize.width / 2 + offsetX,
             y: scrollView.contentSize.height / 2 + offsetY
         )

@@ -20,6 +20,7 @@ class DelegateContentCell: UICollectionViewCell {
             updateLayout()
         }
     }
+    
     @IBOutlet weak var img: CacheImageView!
     @IBOutlet weak var name: UILabel!
     @IBOutlet weak var desc: UILabel!
@@ -28,15 +29,18 @@ class DelegateContentCell: UICollectionViewCell {
     override init(frame: CGRect) {
         super.init(frame: frame)
     }
+    
     required init?(coder: NSCoder) {
         super.init(coder: coder)
     }
+    
     override func awakeFromNib() {
         super.awakeFromNib()
         img.layer.cornerRadius = 8
         img.clipsToBounds = true
         updateLayout()
     }
+    
     override func prepareForReuse() {
         super.prepareForReuse()
     }

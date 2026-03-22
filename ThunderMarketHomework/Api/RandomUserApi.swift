@@ -6,17 +6,9 @@
 //
 
 
-enum RandomUserApi {
-    case fetchData(page: Int?, param: RandomUserParam?)
-    case fetchMale
-    case fetchFemale
-    case fetchSeed
-    case fetchNat
-    case fetchInc
-    case fetchExc
-}
 
-enum RandomUserParam: String, CaseIterable {
+
+public enum RandomUserParam: String, CaseIterable, Sendable {
     case male, female, seed, nat, inc, exc
     
     var key: String {

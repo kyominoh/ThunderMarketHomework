@@ -9,6 +9,16 @@ import Foundation
 import Moya
 internal import Alamofire
 
+enum RandomUserApi {
+    case fetchData(page: Int?, param: RandomUserParam?)
+    case fetchMale
+    case fetchFemale
+    case fetchSeed
+    case fetchNat
+    case fetchInc
+    case fetchExc
+}
+
 extension RandomUserApi: TargetType {
     var baseURL: URL {
         URL(string: "https://randomuser.me")!

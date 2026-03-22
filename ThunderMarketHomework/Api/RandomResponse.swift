@@ -7,11 +7,11 @@
 
 import Foundation
 
-struct RandomResponse<T: Codable>: Codable {
+public struct RandomResponse<T: Codable & Sendable>: Codable, Sendable {
     let results: [T]
     let info: RandomInfo
 }
-struct RandomData: Codable, Hashable, Equatable, Sendable {
+public struct RandomData: Codable, Hashable, Equatable, Sendable {
     let gender: String
     let name: RandomName
     let location: RandomLocation
@@ -25,7 +25,11 @@ struct RandomData: Codable, Hashable, Equatable, Sendable {
     let picture: RandomPicture
     let nat: String?
     public static func == (lhs: RandomData, rhs: RandomData) -> Bool {
-        lhs.name == rhs.name
+        lhs.login.uuid == rhs.login.uuid
+    }
+
+    public func hash(into hasher: inout Hasher) {
+        hasher.combine(login.uuid)
     }
 }
 struct RandomName: Codable, Hashable, Equatable {
@@ -105,7 +109,7 @@ struct RandomPicture: Codable, Hashable, Equatable {
     let thumbnail: String
 }
 
-struct RandomInfo: Codable {
+struct RandomInfo: Codable, Sendable {
     let seed: String
     let results: Int
     let page: Int

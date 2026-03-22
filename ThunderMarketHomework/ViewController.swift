@@ -16,8 +16,7 @@ struct ContentViewModel {
 }
 
 class ViewController: UITabBarController {
-    private let configViewController = ConfigViewController()
-    private lazy var pageViewControllers: [UIViewController] = [configViewController]
+    lazy var pageViewControllers: [UIViewController] = []
     var fakeViewControllers: [UIViewController] = []
     let pageViewController = UIPageViewController(transitionStyle: .scroll, navigationOrientation: .horizontal)
     let alignChangeBtn: UIButton = UIButton(type: .system)
@@ -27,6 +26,9 @@ class ViewController: UITabBarController {
         super.viewDidLoad()
         // Do any additional setup after loading the view.
         self.setupTabbar()
+//        addConfigView()
+        addDelegateTypeView()
+        addDifferableTypeView()
         self.setupPageViewController()
         self.setupFloatingButton()
     }
@@ -34,30 +36,38 @@ class ViewController: UITabBarController {
         self.view.addSubview(alignChangeBtn)
         alignChangeBtn.addTarget(self, action: #selector(toggleAlign), for: .touchUpInside)
         alignChangeBtn.setTitle("정렬변경", for: .normal)
+        alignChangeBtn.setTitleColor(.white, for: .normal)
+        alignChangeBtn.backgroundColor = .systemBlue
+        alignChangeBtn.layer.cornerRadius = 10
+        alignChangeBtn.clipsToBounds = true
+        alignChangeBtn.contentEdgeInsets = UIEdgeInsets(top: 20, left: 20, bottom: 20, right: 20)
         alignChangeBtn.snp.makeConstraints { make in
             make.trailing.equalToSuperview().inset(20)
-            make.bottom.equalTo(tabBar.snp.top).inset(50)
+            make.bottom.equalTo(self.view.safeAreaInsets.bottom).inset(100)
         }
     }
     
     private func setupTabbar() {
+        self.viewControllers = fakeViewControllers
+        self.delegate = self
+    }
+    
+    private func addConfigView() {
+        let configViewController = ConfigViewController()
         let fakeOne = UIViewController()
         fakeOne.tabBarItem = UITabBarItem(title: "설정?", image: UIImage(systemName: "config"), tag: 0)
         fakeViewControllers.append(fakeOne)
-        self.viewControllers = fakeViewControllers
-        self.delegate = self
-//        configViewController.onButtonTap = { [weak self] in
-//            guard let self else { return }
-//            let content = ContentDelegateTypeViewController()
-//            self.pageViewControllers.append(content)
-//            let fakeView = UIViewController()
-//            fakeView.tabBarItem = UITabBarItem(title: "\(fakeViewControllers.count)", image: UIImage(systemName: "config"), tag: fakeViewControllers.count)
-//            self.fakeViewControllers.append(fakeView)
-//            self.viewControllers = self.fakeViewControllers
-//        }
-        
-        addDelegateTypeView()
-        addDifferableTypeView()
+        self.pageViewControllers.append(configViewController)
+        self.viewControllers = self.fakeViewControllers
+        configViewController.onButtonTap = { [weak self] in
+            guard let self else { return }
+            let content = ContentDelegateTypeViewController()
+            self.pageViewControllers.append(content)
+            let fakeView = UIViewController()
+            fakeView.tabBarItem = UITabBarItem(title: "\(fakeViewControllers.count)", image: UIImage(systemName: "list.bullet"), tag: fakeViewControllers.count)
+            self.fakeViewControllers.append(fakeView)
+            self.viewControllers = self.fakeViewControllers
+        }
     }
     
     private func addDelegateTypeView() {
@@ -65,7 +75,7 @@ class ViewController: UITabBarController {
             vc.contentDataSource = self
             self.pageViewControllers.append(vc)
             let fakeView = UIViewController()
-            fakeView.tabBarItem = UITabBarItem(title: "\(fakeViewControllers.count)", image: UIImage(systemName: "config"), tag: fakeViewControllers.count)
+            fakeView.tabBarItem = UITabBarItem(title: "Delegate+Rx", image: UIImage(systemName: "list.star"), tag: fakeViewControllers.count)
             self.fakeViewControllers.append(fakeView)
             self.viewControllers = self.fakeViewControllers
         }
@@ -75,7 +85,7 @@ class ViewController: UITabBarController {
         let vc = ContentDifferableTypeViewController()
         self.pageViewControllers.append(vc)
         let fakeView = UIViewController()
-        fakeView.tabBarItem = UITabBarItem(title: "\(fakeViewControllers.count)", image: UIImage(systemName: "config"), tag: fakeViewControllers.count)
+        fakeView.tabBarItem = UITabBarItem(title: "Diff+TCA", image: UIImage(systemName: "list.bullet"), tag: fakeViewControllers.count)
         self.fakeViewControllers.append(fakeView)
         self.viewControllers = self.fakeViewControllers
     }
